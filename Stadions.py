@@ -1,25 +1,12 @@
 import sys
 from io import BytesIO
-import requests
+from PlaceSearch import get_response_about_place, get_coordinates_place
 from PIL import Image
+import requests
 from MapScaling import get_scale_size
 toponym_to_find = " ".join(sys.argv[1:])
-geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
-geocoder_params = {
-    "apikey": "40d1649f-0493-4b70-98ba-98533de7710b",
-    "geocode": toponym_to_find,
-    "format": "json"}
-response = requests.get(geocoder_api_server, params=geocoder_params)
-if not response:
-    pass
-json_response = response.json()
-# Получаем первый топоним из ответа геокодера.
-toponym = json_response["response"]["GeoObjectCollection"][
-    "featureMember"][0]["GeoObject"]
-# Координаты центра топонима:
-toponym_coodrinates = toponym["Point"]["pos"]
-# Долгота и широта:
-toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
+json_response = get_response_about_place(toponym_to_find).json()
+toponym_longitude, toponym_lattitude = get_coordinates_place(json_response)
 map_params = {
     "ll": ",".join([toponym_longitude, toponym_lattitude]),
     "spn": get_scale_size(json_response),
